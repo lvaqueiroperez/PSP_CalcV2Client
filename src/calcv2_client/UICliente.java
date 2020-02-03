@@ -5,6 +5,12 @@
  */
 package calcv2_client;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import static java.lang.Thread.sleep;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,6 +19,8 @@ import java.util.logging.Logger;
  * @author luis-
  */
 public class UICliente extends javax.swing.JFrame {
+
+    public String op = "";
 
     /**
      * Creates new form UICliente
@@ -47,6 +55,7 @@ public class UICliente extends javax.swing.JFrame {
         btnprod = new javax.swing.JButton();
         btndiv = new javax.swing.JButton();
         btnResult = new javax.swing.JButton();
+        btnBorrar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -149,6 +158,18 @@ public class UICliente extends javax.swing.JFrame {
         });
 
         btnResult.setText("=");
+        btnResult.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnResultActionPerformed(evt);
+            }
+        });
+
+        btnBorrar.setText("BORRAR");
+        btnBorrar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBorrarActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -196,6 +217,10 @@ public class UICliente extends javax.swing.JFrame {
                                 .addGap(91, 91, 91)
                                 .addComponent(btndiv)))))
                 .addGap(29, 29, 29))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(39, 39, 39)
+                .addComponent(btnBorrar)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -235,7 +260,9 @@ public class UICliente extends javax.swing.JFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btndiv)
                             .addComponent(btnResult))))
-                .addContainerGap(87, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 41, Short.MAX_VALUE)
+                .addComponent(btnBorrar)
+                .addGap(23, 23, 23))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -285,17 +312,139 @@ public class UICliente extends javax.swing.JFrame {
     private void btn0ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn0ActionPerformed
         txtCalc.setText(txtCalc.getText() + "0");    }//GEN-LAST:event_btn0ActionPerformed
 
+    private void btnBorrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBorrarActionPerformed
+        txtCalc.setText("");
+        op = "";
+    }//GEN-LAST:event_btnBorrarActionPerformed
+
+    private void btnResultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResultActionPerformed
+
+        //RECOGER EL STRING Y CONVERTIRLO POR PARTES EN VARIABLES
+        //PODEMOS USAR LA OPERACIÓN COMO SEPARADOR DEL SPLIT    !!!
+        //NO PODEMOS USAR CARACTERES DE OPERACIONES COMO SPLIT, ESTÁN RESERVADOS !!!
+        //
+        txtCalc.setText(txtCalc.getText() + "=");
+        //OBTENEMOS LOS OPERADORES
+        //OP1
+        String op1S = "";
+        String op2S = "";
+        char carac = '0';
+        int cont = 0;
+        do {
+            carac = txtCalc.getText().charAt(cont);
+
+            if (Character.isDigit(carac) == false) {
+                //OP2
+                cont++;
+                do {
+                    carac = txtCalc.getText().charAt(cont);
+                    if (Character.isDigit(carac) == false) {
+                        break;
+                    } else {
+                        op2S += carac;
+                        cont++;
+                    }
+                } while (Character.isDigit(carac) == true);
+
+            } else {
+
+                op1S += carac;
+                cont++;
+            }
+
+        } while (Character.isDigit(carac) == true);
+        //COMPROBAMOS
+        System.out.println("OPERADOR 1: " + op1S);
+        System.out.println("OPERADOR 2: " + op2S);
+        //PARSEAMOS
+        int op1 = Integer.parseInt(op1S);
+        int op2 = Integer.parseInt(op2S);
+
+        //ENVIAMOS DATOS AL SERVER PARA QUE NOS DEVUELVA EL RESULTADO
+        //HACER ESTO EN UNA CLASE A PARTE ENVIÁNDOLE LOS DATOS??? (var globales)
+        try {
+            System.out.println("***** Creando socket cliente *****");
+            Socket clienteSocket = new Socket();
+
+            System.out.println("***** Estableciendo la conexión *****");
+
+            InetSocketAddress addr = new InetSocketAddress("localhost", 5555);
+            clienteSocket.connect(addr);
+
+            //OPERACIÓN
+            InputStream is = clienteSocket.getInputStream();
+            OutputStream os = clienteSocket.getOutputStream();
+
+            System.out.println("***** Enviando operación *****");
+
+            os.write(op1);
+            try {
+                sleep(2000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(UICliente.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            os.write(op2);
+            try {
+                sleep(2000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(UICliente.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            //la operación, podemos identificarla con un número
+            switch (op) {
+
+                case "+":
+                    os.write(1);
+                    break;
+                case "-":
+                    os.write(2);
+                    break;
+                case "*":
+                    os.write(3);
+                    break;
+                case "/":
+                    os.write(4);
+                    break;
+                default:
+                    System.out.println("***** NO SE HA RECONOCIDO LA OPERACIÓN *****");
+
+            }
+            
+            //ESPERAMOS AL RESULTADO
+            
+            System.out.println("***** CERRANDO SOCKET CLIENTE *****");
+            clienteSocket.close();
+
+        } catch (IOException ex) {
+            Logger.getLogger(UICliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+
+    }//GEN-LAST:event_btnResultActionPerformed
+
     private void btnsumActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnsumActionPerformed
-        txtCalc.setText(txtCalc.getText() + "+");    }//GEN-LAST:event_btnsumActionPerformed
+        //CADA VEZ QUE SE INTRODUZCA UNA OPERACIÓN, LO USAREMOS COMO SEÑAL
+        //DE QUE EL PRIMER OPERANDO YA ESTÁ LISTO Y PONDREMOS UN SEPARADOR
+        op = "+";
+        txtCalc.setText(txtCalc.getText() + ("+"));
+
+    }//GEN-LAST:event_btnsumActionPerformed
 
     private void btnresActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnresActionPerformed
-        txtCalc.setText(txtCalc.getText() + "-");    }//GEN-LAST:event_btnresActionPerformed
+        op = "-";
+        txtCalc.setText(txtCalc.getText() + "-");
+
+    }//GEN-LAST:event_btnresActionPerformed
 
     private void btnprodActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnprodActionPerformed
-        txtCalc.setText(txtCalc.getText() + "*");    }//GEN-LAST:event_btnprodActionPerformed
+        op = "*";
+        txtCalc.setText(txtCalc.getText() + "*");
+
+    }//GEN-LAST:event_btnprodActionPerformed
 
     private void btndivActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btndivActionPerformed
-        txtCalc.setText(txtCalc.getText() + "/");    }//GEN-LAST:event_btndivActionPerformed
+        op = "/";
+        txtCalc.setText(txtCalc.getText() + "/");
+    }//GEN-LAST:event_btndivActionPerformed
 
     /**
      * @param args the command line arguments
@@ -343,11 +492,12 @@ public class UICliente extends javax.swing.JFrame {
     private javax.swing.JButton btn7;
     private javax.swing.JButton btn8;
     private javax.swing.JButton btn9;
+    private javax.swing.JButton btnBorrar;
     private javax.swing.JButton btnResult;
     private javax.swing.JButton btndiv;
     private javax.swing.JButton btnprod;
     private javax.swing.JButton btnres;
-    private javax.swing.JButton btnsum;
+    public javax.swing.JButton btnsum;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField txtCalc;
     // End of variables declaration//GEN-END:variables

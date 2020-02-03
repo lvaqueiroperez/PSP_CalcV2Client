@@ -18,6 +18,7 @@ public class CalcV2_Client {
         //si le damos al "x" de la ventana, se cierran todos los clientes
         //(en un caso real, cada cliente estaría en una máquina diferente o al menos en una ejecución diferente (?))
         for (int i = 0; i < 2; i++) {
+            //SE INICIAN N HILOS
             HiloClientes h = new HiloClientes();
             h.start();
         }

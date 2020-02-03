@@ -14,11 +14,13 @@ public class HiloClientes extends Thread {
 
     @Override
     public void run() {
-
+        //OJO!! EN UN CLIENTE REAL NO SE USARÍAN ESTOS HILOS
+        //AQUÍ SE USAN HILOS PARA SIMULAR QUE HAY VARIOS CLIENTES CONECTADOS,
+        //EN LA REALIDAD HABRÍA VARIOS PROGRAMAS A LA VEZ CONECTADOS
         UICliente obj = new UICliente();
         obj.setVisible(true);
 
-        System.out.println("acabando hilo");
+        System.out.println("iniciando hilo cliente");
 
     }
 
