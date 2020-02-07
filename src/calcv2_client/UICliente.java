@@ -13,6 +13,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -21,6 +22,9 @@ import java.util.logging.Logger;
 public class UICliente extends javax.swing.JFrame {
 
     public String op = "";
+    private int port = 5555;
+    private String ip = "localhost";
+    String opcion;
 
     /**
      * Creates new form UICliente
@@ -56,6 +60,8 @@ public class UICliente extends javax.swing.JFrame {
         btndiv = new javax.swing.JButton();
         btnResult = new javax.swing.JButton();
         btnBorrar = new javax.swing.JButton();
+        btnPuerto = new javax.swing.JButton();
+        btnIp = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -171,15 +177,26 @@ public class UICliente extends javax.swing.JFrame {
             }
         });
 
+        btnPuerto.setText("Puerto");
+        btnPuerto.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPuertoActionPerformed(evt);
+            }
+        });
+
+        btnIp.setText("IP");
+        btnIp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnIpActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(btnres))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(txtCalc, javax.swing.GroupLayout.PREFERRED_SIZE, 379, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -215,11 +232,21 @@ public class UICliente extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(btnResult)
                                 .addGap(91, 91, 91)
-                                .addComponent(btndiv)))))
+                                .addComponent(btndiv))))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(btnPuerto)
+                            .addComponent(btnres))))
                 .addGap(29, 29, 29))
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(39, 39, 39)
-                .addComponent(btnBorrar)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(39, 39, 39)
+                        .addComponent(btnBorrar))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(385, 385, 385)
+                        .addComponent(btnIp)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -227,11 +254,18 @@ public class UICliente extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(40, 40, 40)
                 .addComponent(txtCalc, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(67, 67, 67)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btn1)
-                    .addComponent(btn2)
-                    .addComponent(btn3))
+                .addGap(18, 18, 18)
+                .addComponent(btnPuerto)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(20, 20, 20)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btn1)
+                            .addComponent(btn2)
+                            .addComponent(btn3)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnIp)))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(49, 49, 49)
@@ -320,7 +354,6 @@ public class UICliente extends javax.swing.JFrame {
     private void btnResultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResultActionPerformed
 
         //RECOGER EL STRING Y CONVERTIRLO POR PARTES EN VARIABLES
-        //PODEMOS USAR LA OPERACIÓN COMO SEPARADOR DEL SPLIT    !!!
         //NO PODEMOS USAR CARACTERES DE OPERACIONES COMO SPLIT, ESTÁN RESERVADOS !!!
         //
         txtCalc.setText(txtCalc.getText() + "=");
@@ -361,14 +394,13 @@ public class UICliente extends javax.swing.JFrame {
         int op2 = Integer.parseInt(op2S);
 
         //ENVIAMOS DATOS AL SERVER PARA QUE NOS DEVUELVA EL RESULTADO
-        //HACER ESTO EN UNA CLASE A PARTE ENVIÁNDOLE LOS DATOS??? (var globales)
         try {
             System.out.println("***** Creando socket cliente *****");
             Socket clienteSocket = new Socket();
 
             System.out.println("***** Estableciendo la conexión *****");
 
-            InetSocketAddress addr = new InetSocketAddress("localhost", 5555);
+            InetSocketAddress addr = new InetSocketAddress(ip, port);
             clienteSocket.connect(addr);
 
             //OPERACIÓN
@@ -408,11 +440,25 @@ public class UICliente extends javax.swing.JFrame {
                     System.out.println("***** NO SE HA RECONOCIDO LA OPERACIÓN *****");
 
             }
-            
+
             //ESPERAMOS AL RESULTADO
-            
-            System.out.println("***** CERRANDO SOCKET CLIENTE *****");
-            clienteSocket.close();
+            int resultado = is.read();
+            System.out.println("***** RESULTADO RECIBIDO *****");
+
+            txtCalc.setText("= " + resultado);
+
+            opcion = JOptionPane.showInputDialog(null, "Desea seguir haciendo operaciones? s/n");
+
+            if (opcion.equals("n")) {
+                System.out.println("***** CERRANDO SOCKET CLIENTE *****");
+                clienteSocket.close();
+                this.dispose();
+
+            } else {
+
+                txtCalc.setText("");
+
+            }
 
         } catch (IOException ex) {
             Logger.getLogger(UICliente.class.getName()).log(Level.SEVERE, null, ex);
@@ -445,6 +491,19 @@ public class UICliente extends javax.swing.JFrame {
         op = "/";
         txtCalc.setText(txtCalc.getText() + "/");
     }//GEN-LAST:event_btndivActionPerformed
+
+    private void btnPuertoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPuertoActionPerformed
+
+        port = Integer.parseInt(JOptionPane.showInputDialog("Introduce el puerto: "));
+
+
+    }//GEN-LAST:event_btnPuertoActionPerformed
+
+    private void btnIpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIpActionPerformed
+
+        ip = JOptionPane.showInputDialog("Introduce la IP: ");
+
+    }//GEN-LAST:event_btnIpActionPerformed
 
     /**
      * @param args the command line arguments
@@ -493,6 +552,8 @@ public class UICliente extends javax.swing.JFrame {
     private javax.swing.JButton btn8;
     private javax.swing.JButton btn9;
     private javax.swing.JButton btnBorrar;
+    private javax.swing.JButton btnIp;
+    private javax.swing.JButton btnPuerto;
     private javax.swing.JButton btnResult;
     private javax.swing.JButton btndiv;
     private javax.swing.JButton btnprod;

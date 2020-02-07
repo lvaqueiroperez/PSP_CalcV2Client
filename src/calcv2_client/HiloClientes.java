@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 
 public class HiloClientes extends Thread {
 
+    //CADA CLIENTE DEBE TENER SU PUERTO Y SU OP
     @Override
     public void run() {
         //OJO!! EN UN CLIENTE REAL NO SE USARÍAN ESTOS HILOS
