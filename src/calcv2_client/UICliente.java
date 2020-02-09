@@ -399,7 +399,7 @@ public class UICliente extends javax.swing.JFrame {
             Socket clienteSocket = new Socket();
 
             System.out.println("***** Estableciendo la conexión *****");
-
+            //IP Y PUERTO DEL SERVER
             InetSocketAddress addr = new InetSocketAddress(ip, port);
             clienteSocket.connect(addr);
 
